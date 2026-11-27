@@ -719,6 +719,24 @@ namespace bgfx
 		void* queue;      //!< D3D12 or Metal command queue.
 	};
 
+	/// External Vulkan device description. Lets bgfx share the instance and physical
+	/// device an external `VkDevice` was created from (needed to create swap chains on
+	/// it) and restricts bgfx to the extensions that were enabled by the owner.
+	///
+	struct VulkanExternalDevice
+	{
+		VulkanExternalDevice();
+
+		void* instance;                        //!< `VkInstance` the device was created from.
+		void* physicalDevice;                  //!< `VkPhysicalDevice` the device was created on.
+		uint32_t queueFamilyIndex;             //!< Queue family the device created its graphics+compute
+		                                       ///  queue on, or `UINT32_MAX` to let bgfx pick one.
+		const char* const* instanceExtensions; //!< Extensions enabled on the instance.
+		uint32_t numInstanceExtensions;        //!< Number of entries in `instanceExtensions`.
+		const char* const* deviceExtensions;   //!< Extensions enabled on the device.
+		uint32_t numDeviceExtensions;          //!< Number of entries in `deviceExtensions`.
+	};
+
 	/// Platform data.
 	///
 	/// @attention C99's equivalent binding is `bgfx_platform_data_t`.
@@ -2637,6 +2655,17 @@ namespace bgfx
 		  uint32_t _flags = BGFX_RESET_NONE
 		, const SwapChain* _swapChain = NULL
 		);
+
+	/// Block until a swapchain buffer is available.
+	///
+	/// @returns true if waiting succeeded and swapchain is guaranteed to have at least one empty slot
+	///
+	/// @remarks
+	///   Library must be initialized.
+	///
+	/// @attention C99's equivalent binding is `bgfx_wait_for_swapchain`.
+	///
+	bool waitForSwapchain();
 
 	/// Advance to next frame. This is the main frame-advancement call on the
 	/// API thread (the thread from which `bgfx::init` was called).
